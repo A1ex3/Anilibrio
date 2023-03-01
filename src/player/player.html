@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="../../vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="styles.css">
+
+  <script src="../../vendor/vue.global.js"></script>
+  <script src="../../vendor/axios.min.js"></script>
+  <script src="playerjs.js"></script>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Title</title>
+</head>
+
+<body>
+
+  <div class="font-set a-stls" id="app">
+    <nav class="navbar navbar-expand-lg navbar-light">
+      <div class="container-fluid">
+        <a class="home-link" href="../../index.html">Главная</a>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <form onsubmit="return false;" class="w-50 d-flex mx-auto my-2 my-lg-0">
+              <div class="input-group input-group-lg">
+                <input @input="getSearchResults" v-model="searchQuery" class="form-control" type="search" placeholder="Search" aria-label="Search">
+              </div>
+            </form>
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" style="color:white; font-size: 32px;" href="../catalog/catalog.html">Каталог</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" style="color:white; font-size: 32px; " href="../schedule/schedule.html">Расписание</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" style="font-size: 32px;" href="../profile/profile.html">Профиль</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+    <!--results of search-->
+    <div>
+      <div class="container">
+        <div class="" v-for="(result, index) in searchResults" :key="index">
+          <a :href="'../title_page/title_page.html?id='+result.id">
+            <div style="background-color: #444444;" class="list-group-item list-group-item-action">
+              <img :src="`https://static-libria.weekstorm.one/`+result.posters.small.url" class="search-poster card-img-top" alt="...">
+              <div style="color:white" class="search-name">{{result.names.ru}}</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <!---->
+    <div>
+      <div class="container">
+        <div class="" v-for="(result, index) in searchResults" :key="index">
+          <a :href="'../title_page/title_page.html?id='+result.id">
+            <div class="list-group-item list-group-item-action">
+              <img :src="`https://static-libria.weekstorm.one/`+result.posters.small.url" class="search-poster card-img-top" alt="...">
+              <div class="search-name">{{result.names.ru}}</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <!---->
+
+    <div class="d-flex justify-content-center align-items-center" style="min-height: 850px;">
+      <div class="text-center">
+        <a class="name-title" :href="`../title_page/title_page.html?id=`+id_param">
+          <div style="color: white;">{{title_name}}</div>
+        </a>
+        <p></p>
+        <div style="width: 1200px;height: 1200px;" id="player"></div>
+      </div>
+    </div>
+
+    <!--end of id="app"-->
+    </div>
+    <script>
+      Vue.createApp({
+        data() {
+          return {
+            id_param: '',
+            title_name: '',
+            searchQuery: '',
+            searchResults: [],
+          };
+        },
+        methods: {
+          async getSearchResults() {
+            try {
+              const response = await axios.get(`https://api.anilibria.tv/v3/title/search?search=${this.searchQuery}&filter=id,names.ru,posters,limit=10`);
+              this.searchResults = response.data.list;
+            } catch (error) {}
+          }
+        },
+        async mounted() {
+          const urlParams = new URLSearchParams(window.location.search);
+          this.id_param = urlParams.get('id');
+          const episode_param = urlParams.get('episode');
+          var file_arr = [];
+          var string_for_file;
+          try {
+            const response = await axios.get(
+              `https://api.anilibria.tv/v3/title?id=${this.id_param}&filter=id,player,names.ru&remove=player.episodes,player.name,player.uuid,player.preview,player.rutube`
+            );
+            this.title_name = response.data.names.ru;
+            this.resp = response.data.player.list;
+            string_for_file = "https://" + response.data.player.host;
+          } catch (error) {}
+          for (const key in this.resp) {
+            const episode = this.resp[key];
+            let fileString = "";
+            if (episode.hls.sd) {
+              fileString += `[480p]${string_for_file}${episode.hls.sd}`;
+            }
+            if (episode.hls.hd) {
+              fileString += `, [720p]${string_for_file}${episode.hls.hd}`;
+            }
+            if (episode.hls.fhd) {
+              fileString += `, [1080p]${string_for_file}${episode.hls.fhd}`;
+            }
+            const episodeFile = {
+              "title": episode.episode,
+              "file": fileString,
+              "id": episode.episode,
+            };
+            file_arr.push(episodeFile);
+          }
+          var player = new Playerjs({
+            id: "player",
+            autoplay: true,
+            file: file_arr
+          });
+          player.api("find", episode_param);
+        }
+      }).mount('#app');
+    </script>
+</body>
+
+</html>

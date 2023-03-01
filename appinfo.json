@@ -1,0 +1,10 @@
+{
+  "id": "tv.anilibrio",
+  "version": "0.0.1",
+  "vendor": "Anilibrio",
+  "type": "web",
+  "main": "index.html",
+  "title": "Anilibrio",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png"
+}

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="../../vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="../styles.css">
+
+  <script src="../../vendor/vue.global.js"></script>
+  <script src="../../vendor/axios.min.js"></script>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Title</title>
+</head>
+
+<body style="background-color: #171717;">
+
+  <div class="font-set a-stls" id="app">
+    <nav class="navbar navbar-expand-lg navbar-light">
+      <div class="container-fluid">
+        <a class="home-link" href="../../index.html">Главная</a>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <form onsubmit="return false;" class="w-50 d-flex mx-auto my-2 my-lg-0">
+              <div class="input-group input-group-lg">
+                <input @input="getSearchResults" v-model="searchQuery" class="form-control" type="search" placeholder="Search" aria-label="Search">
+              </div>
+            </form>
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" style="color:white; font-size: 32px;" href="../catalog/catalog.html">Каталог</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" style="color:white; font-size: 32px; " href="../schedule/schedule.html">Расписание</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" style="font-size: 32px;" href="../profile/profile.html">Профиль</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+    <!--results of search-->
+    <div>
+      <div class="container">
+        <div class="" v-for="(result, index) in searchResults" :key="index">
+          <a :href="'../title_page/title_page.html?id='+result.id">
+            <div style="background-color: #444444;" class="list-group-item list-group-item-action">
+              <img :src="`https://static-libria.weekstorm.one/`+result.posters.small.url" class="search-poster card-img-top" alt="...">
+              <div style="color:white" class="search-name">{{result.names.ru}}</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <!---->
+    <div>
+      <div class="container">
+        <div class="" v-for="(result, index) in searchResults" :key="index">
+          <a :href="'../title_page/title_page.html?id='+result.id">
+            <div class="list-group-item list-group-item-action">
+              <img :src="`https://static-libria.weekstorm.one/`+result.posters.small.url" class="search-poster card-img-top" alt="...">
+              <div class="search-name">{{result.names.ru}}</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <!---->
+
+    <div class="container mt-5">
+      <div class="row">
+        <!-- Left Column - Image -->
+        <div class="col-lg-4">
+          <img :src="`https://static-libria.weekstorm.one/`+posters_original" class="img-fluid" alt="Show Poster">
+        </div>
+
+        <!-- Right Column - Title and Episode List -->
+        <div class="col-lg-8">
+          <h1 style="font-size: 60px;">{{ title_name_ru}}</h1>
+          <h1>{{ title_name_en}}</h1>
+          <div>Статус: {{status}}</div>
+          <div>Тип: {{type}}</div>
+          <div>
+            Жанры:
+            <div v-for="(genre,index) in genres" :key="index" class="item">
+              {{genre}}
+              <span v-if="index < genres.length - 1">| </span>
+            </div>
+          </div>
+          <div>Эпизоды: {{episodes}}</div>
+          <div>Год: {{year}}</div>
+          <p></p>
+          <p style="font-size: 19px;">{{dscription}}</p>
+        </div>
+      </div>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12" style="height: 100px;">
+            <div class="d-flex flex-wrap">
+              <div class="container">
+                <div class="row">
+                  <div class="col-md-12" style="height: 50px;"></div>
+                </div>
+              </div>
+              <!--<button v-for="episode in episodes" :key="episode.episodeNumber" class="btn btn-primary m-2">{{`Episode ${episode.episodeNumber}`}}</button>-->
+              <div v-for="(episode, index) in list" :key="index">
+                <a :href="`../player/player.html?episode=`+episode.episode+`&id=`+id">
+                  <button style="width: 300px;" class="btn btn-primary m-2">
+                    Серия {{episode.episode}}
+                    <p></p>
+                    Обновлена: {{formatDate(episode.created_timestamp)}}
+                    <p></p>
+                    {{episode.index}}
+                    <span v-for="(value, key) in episode.hls" :key="key">
+                      <span class="item" v-if="value !== null">{{ key }}</span>
+                    </span>
+                  </button>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!--end of id="app"-->
+  </div>
+
+  <script>
+    Vue.createApp({
+      data() {
+        return {
+          searchQuery: '',
+          searchResults: [],
+          id: null,
+          posters_original: null,
+          title_name_ru: null,
+          title_name_en: null,
+          status: null,
+          type: null,
+          genres: null,
+          dscription: null,
+          episodes: null,
+          year: null,
+          list: null,
+          created_timestamp: null,
+          hls: null,
+        };
+      },
+      methods: {
+        async getSearchResults() {
+          try {
+            const response = await axios.get(`https://api.anilibria.tv/v3/title/search?search=${this.searchQuery}&filter=id,names.ru,posters,limit=10`);
+            this.searchResults = response.data.list;
+          } catch (error) {}
+        },
+        formatDate(timestamp) {
+          const date = new Date(timestamp * 1000); // Convert timestamp to milliseconds
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = String(date.getFullYear()).substr(-2);
+          const hours = String(date.getHours()).padStart(2, '0');
+          const minutes = String(date.getMinutes()).padStart(2, '0');
+          return `${day}.${month}.${year} ${hours}:${minutes}`;
+        }
+      },
+      async mounted() {
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const id = urlParams.get('id');
+          const response = await axios.get(
+            `https://api.anilibria.tv/v3/title?id=${id}&filter=id,posters,names,status.string,type.full_string,genres,description,season.year,player.episodes.string,player.list`
+          );
+          this.id = response.data.id;
+          this.posters_original = response.data.posters.original.url;
+          this.title_name_ru = response.data.names.ru;
+          this.title_name_en = response.data.names.en;
+          this.status = response.data.status.string;
+          this.type = response.data.type.full_string;
+          this.genres = response.data.genres;
+          this.dscription = response.data.description;
+          this.year = response.data.season.year;
+          this.episodes = response.data.player.episodes.string;
+          this.list = response.data.player.list;
+          this.created_timestamp = response.data.player.list;
+          //this.hls = response.data.player.list;
+        } catch (error) {}
+      },
+    }).mount('#app');
+  </script>
+
+  <style>
+    .item {
+      display: inline-block;
+      margin-right: 5px;
+    }
+  </style>
+</body>
+
+</html>
