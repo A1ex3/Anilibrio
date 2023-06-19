@@ -53,20 +53,6 @@
         </div>
       </div>
     </div>
-    <!---->
-    <div>
-      <div class="container">
-        <div class="" v-for="(result, index) in searchResults" :key="index">
-          <a :href="'../title_page/title_page.html?id='+result.id">
-            <div class="list-group-item list-group-item-action">
-              <img :src="`https://static-libria.weekstorm.one/`+result.posters.small.url" class="search-poster card-img-top" alt="...">
-              <div class="search-name">{{result.names.ru}}</div>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
-    <!---->
 
     <div class="container mt-5">
       <div class="row">
