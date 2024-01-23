@@ -1,4 +1,4 @@
-name: WebOS.
+name: Create a release.
 
 on:
     push:
@@ -26,19 +26,28 @@ jobs:
             
             - name: Build App
               run: ares-package .
-
-            - name: Create archive
+            
+            - name: Create an archive
               run: |
-                mkdir tv_anilibrio_0.0.1
-                cp tv.anilibrio_0.0.1_all.ipk tv_anilibrio_0.0.1/
-                tar -czvf tv_anilibrio_0.0.1.tar.gz tv_anilibrio_0.0.1
+                mkdir anilibrio_0.0.1_static
+                cp -r !(.github/|webOSTVjs-1.2.4/|.gitignore|appinfo.json|tv.anilibrio_0.0.1_all.ipk) anilibrio_0.0.1_static/
+                tar -czvf anilibrio_0.0.1_static.tar.gz anilibrio_0.0.1_static
+              working-directory: ${{ github.workspace }}
+
+            - name: Create an archive for WebOS
+              run: |
+                mkdir tv_anilibrio_0.0.1_web_os
+                cp tv.anilibrio_0.0.1_all.ipk tv_anilibrio_0.0.1_web_os/
+                tar -czvf tv_anilibrio_0.0.1_web_os.tar.gz tv_anilibrio_0.0.1_web_os
               working-directory: ${{ github.workspace }}
 
             - name: Publishing to GitHub Release 
               id: create_release
               uses: softprops/action-gh-release@v1
               with:
-                files: tv_anilibrio_0.0.1.tar.gz
+                files: |
+                  tv_anilibrio_0.0.1_web_os.tar.gz
+                  anilibrio_0.0.1_static.tar.gz
                 tag_name: latest
               env:
                 GITHUB_TOKEN: ${{ secrets.ACTIONS }}
