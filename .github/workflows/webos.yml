@@ -1,0 +1,44 @@
+name: WebOS.
+
+on:
+    push:
+      branches:
+        - '*'
+    pull_request:
+      branches:
+        - '*'
+
+jobs:
+    build:
+        name: Build And Create Release
+        runs-on: ubuntu-latest
+    
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                node-version: '20.x'
+
+            - name: Install ares-cli
+              run: npm install -g @webosose/ares-cli
+            
+            - name: Build App
+              run: ares-package .
+
+            - name: Create archive
+              run: |
+                mkdir tv_anilibrio_0.0.1
+                cp tv.anilibrio_0.0.1_all.ipk tv_anilibrio_0.0.1/
+                tar -czvf tv_anilibrio_0.0.1.tar.gz tv_anilibrio_0.0.1
+              working-directory: ${{ github.workspace }}
+
+            - name: Publishing to GitHub Release 
+              id: create_release
+              uses: softprops/action-gh-release@v1
+              with:
+                files: tv_anilibrio_0.0.1.tar.gz
+                tag_name: latest
+              env:
+                GITHUB_TOKEN: ${{ secrets.ACTIONS }}
