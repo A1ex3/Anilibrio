@@ -41,6 +41,7 @@ jobs:
             - name: Create an archive for WebOS
               run: |
                 mkdir tv_anilibrio_0.0.1_web_os
+                rm -R .images
                 cp tv.anilibrio_0.0.1_all.ipk tv_anilibrio_0.0.1_web_os/
                 tar -czvf tv_anilibrio_0.0.1_web_os.tar.gz tv_anilibrio_0.0.1_web_os
               working-directory: ${{ github.workspace }}
