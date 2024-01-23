@@ -30,7 +30,10 @@ jobs:
             - name: Create an archive
               run: |
                 mkdir anilibrio_0.0.1_static
-                rsync -av --exclude='.github' --exclude='webOSTVjs-1.2.4' --exclude='.gitignore' --exclude='appinfo.json' --exclude='tv.anilibrio_0.0.1_all.ipk' ./ anilibrio_0.0.1_static/
+                rsync -av --exclude='.github' --exclude='webOSTVjs-1.2.4' \
+                  --exclude='.gitignore' --exclude='appinfo.json' \
+                  --exclude='tv.anilibrio_0.0.1_all.ipk' --exclude='anilibrio_0.0.1_static' --exclude='.git' \
+                  ./ anilibrio_0.0.1_static/
                 tar -czvf anilibrio_0.0.1_static.tar.gz anilibrio_0.0.1_static
               working-directory: ${{ github.workspace }}
 
